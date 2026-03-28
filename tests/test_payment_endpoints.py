@@ -5,7 +5,10 @@ from app.main import app
 client = TestClient(app)
 
 
-def test_pay_endpoint_returns_non_final_without_mocked_paid_query() -> None:
+def test_pay_endpoint_returns_non_final_without_mocked_paid_query(monkeypatch) -> None:
+    from app.service import payment_facade
+
+    monkeypatch.setattr(payment_facade.time, "sleep", lambda _: None)
     client.post("/terminal/activate", json={"terminal_sn": "TP1", "terminal_name": "POS"})
     resp = client.post(
         "/payment/pay",
