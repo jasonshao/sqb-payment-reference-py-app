@@ -1,5 +1,7 @@
 import json
 
+from pydantic import ValidationError
+
 from app.protocol.notify_payload import NotifyPayload
 from app.support.callback_verifier import SqbCallbackVerifier
 from app.support.notify_deduplicator import SqbNotifyDeduplicator
@@ -18,7 +20,10 @@ class SqbNotifyHandler:
         self.credential_store = credential_store
 
     def handle(self, body: str, signature: str) -> tuple[bool, str]:
-        payload = NotifyPayload.model_validate_json(body)
+        try:
+            payload = NotifyPayload.model_validate_json(body)
+        except ValidationError:
+            return False, "malformed payload"
         terminal_key = self.credential_store.get_key(payload.terminal_sn)
         if not terminal_key:
             return False, "unknown terminal"

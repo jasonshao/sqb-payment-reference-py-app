@@ -23,3 +23,9 @@ def test_notify_verify_then_success() -> None:
     resp = client.post("/notify", content=body, headers={"X-SQB-Signature": signature})
     assert resp.status_code == 200
     assert resp.text == "success"
+
+
+def test_notify_rejects_malformed_payload() -> None:
+    resp = client.post("/notify", content="{not-json}", headers={"X-SQB-Signature": "bad-signature"})
+    assert resp.status_code == 400
+    assert resp.json() == {"detail": "malformed payload"}
