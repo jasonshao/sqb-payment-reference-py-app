@@ -47,7 +47,6 @@ def get_payment_facade() -> SqbPaymentFacade:
 @lru_cache
 def get_notify_handler() -> SqbNotifyHandler:
     return SqbNotifyHandler(
-        verifier=SqbCallbackVerifier(),
+        verifier=SqbCallbackVerifier(get_settings().sqb_callback_public_key),
         deduplicator=SqbNotifyDeduplicator(),
-        credential_store=get_credential_store(),
     )

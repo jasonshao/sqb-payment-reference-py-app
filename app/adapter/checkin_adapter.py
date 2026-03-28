@@ -7,4 +7,9 @@ class SqbCheckinAdapter:
         self.client = client
 
     def checkin(self, req: CheckinRequest, terminal_key: str) -> dict:
-        return self.client.post("/terminal/checkin", req.model_dump(), terminal_key)
+        return self.client.post(
+            "/terminal/checkin",
+            req.model_dump(exclude_none=True),
+            signatory_sn=req.terminal_sn,
+            sign_key=terminal_key,
+        )

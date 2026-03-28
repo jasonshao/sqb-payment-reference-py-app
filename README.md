@@ -45,15 +45,17 @@ uvicorn app.main:app --reload
 | `APP_NAME` | 否 | 应用名称 | `SQB Payment Reference Python App` |
 | `APP_ENV` | 否 | 运行环境标记 | `dev` |
 | `APP_DEBUG` | 否 | 是否开启调试 | `false` |
-| `SQB_BASE_URL` | 否 | 收钱吧基础地址 | `https://api.shouqianba.com` |
+| `SQB_BASE_URL` | 否 | 收钱吧基础地址 | `https://vsi-api.shouqianba.com` |
 | `SQB_VENDOR_SN` | 建议填写 | 服务商编号 | `your_vendor_sn` |
 | `SQB_VENDOR_KEY` | 建议填写 | 服务商签名密钥 | `your_vendor_key` |
-| `SQB_ACCESS_TOKEN` | 建议填写 | 平台访问令牌 | `your_access_token` |
+| `SQB_CALLBACK_PUBLIC_KEY` | 对接回调时必填 | 收钱吧回调验签公钥 | `-----BEGIN PUBLIC KEY-----...` |
+| `SQB_TIMEOUT_SECONDS` | 否 | HTTP 超时时间 | `10` |
+| `SQB_USE_STUB_TRANSPORT` | 否 | 是否启用本地 stub 传输层 | `true` |
 
 说明：
 
 - 目前仓库里的适配器包含 stub 行为，即使不接真实网关也可以本地联调部分流程
-- 如果你要替换成真实接口，`SQB_VENDOR_SN`、`SQB_VENDOR_KEY`、`SQB_ACCESS_TOKEN` 应视为必填
+- 如果你要替换成真实接口，`SQB_VENDOR_SN`、`SQB_VENDOR_KEY` 和 `SQB_CALLBACK_PUBLIC_KEY` 应视为必填
 
 ## 运行测试
 
@@ -116,8 +118,9 @@ curl http://127.0.0.1:8000/health
 curl -X POST http://127.0.0.1:8000/terminal/activate \
   -H 'Content-Type: application/json' \
   -d '{
-    "terminal_sn": "T1",
-    "terminal_name": "POS-1"
+    "app_id": "app-demo",
+    "code": "code-demo",
+    "device_id": "T1"
   }'
 ```
 
@@ -138,7 +141,8 @@ curl -X POST http://127.0.0.1:8000/terminal/activate \
 curl -X POST http://127.0.0.1:8000/terminal/checkin \
   -H 'Content-Type: application/json' \
   -d '{
-    "terminal_sn": "T1"
+    "terminal_sn": "TSN-T1",
+    "device_id": "T1"
   }'
 ```
 
@@ -148,10 +152,11 @@ curl -X POST http://127.0.0.1:8000/terminal/checkin \
 curl -X POST http://127.0.0.1:8000/payment/pay \
   -H 'Content-Type: application/json' \
   -d '{
-    "terminal_sn": "T1",
+    "terminal_sn": "TSN-T1",
     "client_sn": "ORDER1",
-    "total_amount": 100,
-    "auth_code": "28937492374923",
+    "total_amount": "100",
+    "dynamic_id": "28937492374923",
+    "operator": "cashier-01",
     "subject": "coffee"
   }'
 ```
@@ -168,7 +173,7 @@ curl -X POST http://127.0.0.1:8000/payment/pay \
 
 ### 5. 接收异步回调
 
-`/notify` 需要请求头 `X-SQB-Signature`。成功时返回纯文本 `success`。
+`/notify` 需要请求头 `Authorization`，其值为收钱吧回调签名。成功时返回纯文本 `success`。
 
 示例请求体：
 
