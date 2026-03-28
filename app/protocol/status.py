@@ -2,13 +2,22 @@ from enum import StrEnum
 
 
 class OrderStatus(StrEnum):
+    CREATED = "CREATED"
     PENDING = "PENDING"
     PAID = "PAID"
-    PAY_CANCELED = "PAY_CANCELED"
+    CANCELED = "CANCELED"
     REFUNDED = "REFUNDED"
+    PARTIAL_REFUNDED = "PARTIAL_REFUNDED"
+    USERPAYING = "USERPAYING"
     FAILED = "FAILED"
     UNKNOWN = "UNKNOWN"
 
     @property
     def is_final(self) -> bool:
-        return self in {self.PAID, self.PAY_CANCELED, self.REFUNDED, self.FAILED}
+        return self in {
+            self.PAID,
+            self.CANCELED,
+            self.REFUNDED,
+            self.PARTIAL_REFUNDED,
+            self.FAILED,
+        }

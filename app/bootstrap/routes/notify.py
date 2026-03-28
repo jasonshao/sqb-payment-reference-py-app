@@ -11,10 +11,10 @@ router = APIRouter(prefix="/notify", tags=["notify"])
 async def notify(
     request: Request,
     handler: SqbNotifyHandler = Depends(get_notify_handler),
-    x_sqb_signature: str = Header(alias="X-SQB-Signature"),
+    authorization: str = Header(alias="Authorization"),
 ) -> str:
     body = (await request.body()).decode("utf-8")
-    ok, message = handler.handle(body, x_sqb_signature)
+    ok, message = handler.handle(body, authorization.strip())
     if not ok:
         raise HTTPException(status_code=400, detail=message)
     return "success"

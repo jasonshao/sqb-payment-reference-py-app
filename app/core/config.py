@@ -11,10 +11,15 @@ class Settings(BaseSettings):
     app_env: str = "dev"
     app_debug: bool = False
 
-    sqb_base_url: str = "https://api.shouqianba.com"
+    sqb_base_url: str = "https://vsi-api.shouqianba.com"
     sqb_vendor_sn: str = Field(default="", description="Vendor serial number")
     sqb_vendor_key: str = Field(default="", description="Vendor signing key")
-    sqb_access_token: str = Field(default="", description="SQB access token")
+    sqb_callback_public_key: str = Field(default="", description="SQB callback RSA public key")
+    sqb_timeout_seconds: float = Field(default=10.0, description="SQB HTTP timeout in seconds")
+    sqb_use_stub_transport: bool = Field(
+        default=True,
+        description="Use local stub transport instead of real HTTP requests",
+    )
 
     model_config = SettingsConfigDict(
         env_file=".env",

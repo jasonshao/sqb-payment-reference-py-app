@@ -20,9 +20,11 @@ def activate(
     store: TerminalCredentialStore = Depends(get_credential_store),
 ) -> ActivateResponse:
     resp = adapter.activate(req)
-    terminal_key = resp.get("biz_response", {}).get("terminal_key", f"key-{req.terminal_sn}")
-    store.set_key(req.terminal_sn, terminal_key)
-    return ActivateResponse(terminal_sn=req.terminal_sn, terminal_key=terminal_key)
+    data = resp.get("biz_response", {}).get("data", {})
+    terminal_sn = data.get("terminal_sn", req.device_id)
+    terminal_key = data.get("terminal_key", f"key-{terminal_sn}")
+    store.set_key(terminal_sn, terminal_key)
+    return ActivateResponse(terminal_sn=terminal_sn, terminal_key=terminal_key)
 
 
 @router.post("/checkin", response_model=CheckinResponse)
@@ -36,6 +38,8 @@ def checkin(
         raise HTTPException(status_code=404, detail="terminal not activated")
 
     resp = adapter.checkin(req, terminal_key)
-    updated_key = resp.get("biz_response", {}).get("terminal_key", terminal_key)
-    store.set_key(req.terminal_sn, updated_key)
-    return CheckinResponse(terminal_sn=req.terminal_sn, terminal_key=updated_key)
+    data = resp.get("biz_response", {}).get("data", {})
+    checked_in_terminal_sn = data.get("terminal_sn", req.terminal_sn)
+    updated_key = data.get("terminal_key", terminal_key)
+    store.set_key(checked_in_terminal_sn, updated_key)
+    return CheckinResponse(terminal_sn=checked_in_terminal_sn, terminal_key=updated_key)
